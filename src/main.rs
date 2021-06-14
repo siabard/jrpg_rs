@@ -1,6 +1,8 @@
 use std::path::Path;
 
 use jrpg_rs::graphics::*;
+use jrpg_rs::map::*;
+
 use sdl2::event::Event;
 use sdl2::image::InitFlag;
 use sdl2::rect::Point;
@@ -22,19 +24,19 @@ fn main() -> Result<(), &'static str> {
         .build()
         .expect("ERR::MAIN::INIT::CANVAS");
 
-    let mut texture_creator = canvas.texture_creator();
+    let texture_creator = canvas.texture_creator();
 
     let mut textures = TextureManager::new();
-    textures.load_texture(
-        &mut texture_creator,
-        "player",
-        &Path::new("assets/mychar.png"),
-    );
+    textures.load_texture(&texture_creator, "player", &Path::new("assets/mychar.png"));
 
     let mut renderer = Renderer::new(&mut canvas);
 
     let mut player = Sprite::new(Rect::new(0, 0, 32, 32), 100, 100);
-
+    let map = Map::new(
+        "world_map".to_owned(),
+        &texture_creator,
+        "tiled_base64_zlib.tmx",
+    );
     let mut event_pump = sdl_context
         .event_pump()
         .expect("ERR::MAIN::INIT_EVENT_PUMP");
@@ -71,6 +73,7 @@ fn main() -> Result<(), &'static str> {
             false,
         );
 
+        map.render(&mut renderer, &Rect::new(0, 0, 320, 200));
         renderer.present();
         now = timer_subsystem.ticks();
     }

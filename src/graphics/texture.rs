@@ -19,7 +19,7 @@ impl<'a, 'b> TextureManager<'a, 'b> {
 
     pub fn load_texture(
         &mut self,
-        texture_creator: &'b mut TextureCreator<WindowContext>,
+        texture_creator: &'b TextureCreator<WindowContext>,
         name: &'a str,
         path: &Path,
     ) {

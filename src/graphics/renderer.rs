@@ -26,15 +26,17 @@ impl<'a> Renderer<'a> {
         flip_horizontal: bool,
         flip_vertical: bool,
     ) {
-        self.canvas.copy_ex(
-            texture,
-            src,
-            dst,
-            angle,
-            center,
-            flip_horizontal,
-            flip_vertical,
-        );
+        self.canvas
+            .copy_ex(
+                texture,
+                src,
+                dst,
+                angle,
+                center,
+                flip_horizontal,
+                flip_vertical,
+            )
+            .unwrap();
     }
 
     pub fn present(&mut self) {
