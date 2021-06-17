@@ -31,7 +31,12 @@ fn main() -> Result<(), &'static str> {
 
     let mut renderer = Renderer::new(&mut canvas);
 
-    let mut player = Sprite::new(Rect::new(0, 0, 32, 32), 100, 100);
+    let mut player = Sprite::new(
+        Rect::new(0, 0, 32, 32),
+        textures.get_texture("player").as_ref().unwrap(),
+        100,
+        100,
+    );
     let map = Map::new(
         "world_map".to_owned(),
         &texture_creator,
@@ -74,6 +79,8 @@ fn main() -> Result<(), &'static str> {
         );
 
         map.render(&mut renderer, &Rect::new(0, 0, 320, 200));
+        player.render(&mut renderer);
+
         renderer.present();
         now = timer_subsystem.ticks();
     }
