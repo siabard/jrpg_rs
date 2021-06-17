@@ -1,6 +1,5 @@
 use sdl2::rect::Point;
 use sdl2::rect::Rect;
-use sdl2::render::WindowCanvas;
 
 use std::collections::HashMap;
 
@@ -23,11 +22,7 @@ pub const MAP_HEIGHT: i32 = 15;
 /// 지도에는 map용 파일과
 /// 각 map 블럭에 대한 정보를 넣는다.
 pub struct Map<'a> {
-    map_id: String,
-    pub x: i32,     //  x
-    pub y: i32,     //  y
-    pub cam_x: i32, // camera_x
-    pub cam_y: i32, // camera_y
+    pub map_id: String,
     pub tile_atlases: HashMap<usize, tile::TileAtlas>,
     pub width: u32,  // total number of tile in horizontal in this map
     pub height: u32, // total numbr of tile in vertical in this map
@@ -110,10 +105,6 @@ impl<'a> Map<'a> {
 
         Map {
             map_id,
-            x: 0,
-            y: 0,
-            cam_x: 0,
-            cam_y: 0,
             tile_atlases,
             width: map.width,
             height: map.height,
@@ -129,18 +120,18 @@ impl<'a> Map<'a> {
     }
 
     /// translate position (left, top) to tile
-    /// map is display rom x, y
+    /// map is positioned on (0, 0)
     pub fn point_to_tile(&self, tile_index: usize, left: i32, top: i32) -> (i32, i32) {
-        let o_x = self.x.max(left);
-        let o_y = self.y.max(top);
+        let o_x = 0.max(left);
+        let o_y = 0.max(top);
 
         let tile_width = *self.tile_widths.get(&tile_index).unwrap();
         let tile_height = *self.tile_heights.get(&tile_index).unwrap();
         let clamp_x = o_x.min(left + (self.width * tile_width) as i32 - 1);
         let clamp_y = o_y.min(top + (self.height * tile_height) as i32 - 1);
 
-        let tile_x = (clamp_x - self.x) / tile_width as i32;
-        let tile_y = (clamp_y - self.y) / tile_height as i32;
+        let tile_x = clamp_x / tile_width as i32;
+        let tile_y = clamp_y / tile_height as i32;
 
         (tile_x, tile_y)
     }
