@@ -1,10 +1,12 @@
 use sdl2::{
+    gfx::primitives::DrawRenderer,
+    pixels::Color,
     rect::{Point, Rect},
     render::{Texture, WindowCanvas},
 };
 
 pub struct Renderer<'a> {
-    canvas: &'a mut WindowCanvas,
+    pub canvas: &'a mut WindowCanvas,
 }
 
 impl<'a> Renderer<'a> {
@@ -14,6 +16,11 @@ impl<'a> Renderer<'a> {
 
     pub fn clear(&mut self) {
         self.canvas.clear();
+    }
+
+    pub fn draw_rect(&mut self, rect: Rect) {
+        self.canvas.set_draw_color(Color::RGB(255, 255, 255));
+        self.canvas.draw_rect(rect).unwrap();
     }
 
     pub fn render(

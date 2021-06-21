@@ -1,3 +1,4 @@
+use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Point;
 use sdl2::rect::Rect;
 
@@ -148,63 +149,92 @@ impl<'a> Map<'a> {
         )
     }
 
-    pub fn render(&self, renderer: &mut Renderer, camera_rect: &Rect) {
-        for (i, layer) in self.layers.iter().enumerate() {
-            if layer.name != "collision" {
-                if let tiled::LayerData::Finite(tiles) = &layer.tiles {
-                    let (tile_left, tile_top) = self.point_to_tile(i, camera_rect.x, camera_rect.y);
-                    let (tile_right, tile_bottom) = self.point_to_tile(
-                        i,
-                        camera_rect.x + camera_rect.w,
-                        camera_rect.y + camera_rect.h,
-                    );
+    pub fn render(
+        &self,
+        renderer: &mut Renderer,
+        camera_rect: &Rect,
+        camera_buffer: &mut Texture<'a>,
+    ) {
+        renderer
+            .canvas
+            .with_texture_canvas(camera_buffer, |texture_canvas| {
+                texture_canvas.clear();
+                for (i, layer) in self.layers.iter().enumerate() {
+                    if layer.name != "collision" {
+                        if let tiled::LayerData::Finite(tiles) = &layer.tiles {
+                            let (tile_left, tile_top) =
+                                self.point_to_tile(i, camera_rect.x, camera_rect.y);
+                            let (tile_right, tile_bottom) = self.point_to_tile(
+                                i,
+                                camera_rect.x + camera_rect.w,
+                                camera_rect.y + camera_rect.h,
+                            );
 
-                    // 카메라의 좌측/위가 타일에 정확히 일치한다면 tile_start_x와 tile_start_y는 0이 되겠지만
-                    // 그렇지 않은 경우는 좌측/위 타일에서 떨어진 좌표값만큼을 반환하게된다.
-                    // 이 값은 대상 texture의 영역을 어디에 노출시킬까 정할 때, 대상의 타일을 tile_start_x, tile_start_y만큼
-                    // 좌상단으로 올림으로써 부드러운 스크롤을 가능하게한다.
-                    let tile_width = *self.tile_widths.get(&i).unwrap();
-                    let tile_height = *self.tile_heights.get(&i).unwrap();
+                            // 카메라의 좌측/위가 타일에 정확히 일치한다면 tile_start_x와 tile_start_y는 0이 되겠지만
+                            // 그렇지 않은 경우는 좌측/위 타일에서 떨어진 좌표값만큼을 반환하게된다.
+                            // 이 값은 대상 texture의 영역을 어디에 노출시킬까 정할 때, 대상의 타일을 tile_start_x, tile_start_y만큼
+                            // 좌상단으로 올림으로써 부드러운 스크롤을 가능하게한다.
+                            let tile_width = *self.tile_widths.get(&i).unwrap();
+                            let tile_height = *self.tile_heights.get(&i).unwrap();
 
-                    let tile_start_x = camera_rect.x - tile_left * tile_width as i32;
-                    let tile_start_y = camera_rect.y - tile_top * tile_height as i32;
+                            let tile_start_x = camera_rect.x - tile_left * tile_width as i32;
+                            let tile_start_y = camera_rect.y - tile_top * tile_height as i32;
 
-                    for y in tile_top..tile_bottom {
-                        for x in tile_left..tile_right {
-                            let gid = tiles[y as usize][x as usize].gid;
-                            if gid != 0 {
-                                // gid 로 부터 tile_atlases의 index를 구함
-                                // tile_atlases의 모든 first_gid 중 gid 값보다 큰 것 중에 가장 작은 인덱스를 구할 것
-                                // 해당 인덱스가 tile_atlases의 인덱스이다.
-                                // TODO : 이와 같은 방식은 비 경제적이다.
-                                // tile_atlas를 생성할 때, 어떤 texutre index인지, 그리고 해당 texture의 어떤 위치인지를
-                                // 등록하는 편이 좋다.
-                                // 즉 말하자면 Vector이면 되지, 굳이 HashMap일 필요가 없다.
-                                // Vec<(texture_idx: usize, x, y, w, h)> 이면 됨..
-                                let idx_gid = self.gids.get(&gid).unwrap();
+                            for y in tile_top..tile_bottom {
+                                for x in tile_left..tile_right {
+                                    let gid = tiles[y as usize][x as usize].gid;
+                                    if gid != 0 {
+                                        // gid 로 부터 tile_atlases의 index를 구함
+                                        // tile_atlases의 모든 first_gid 중 gid 값보다 큰 것 중에 가장 작은 인덱스를 구할 것
+                                        // 해당 인덱스가 tile_atlases의 인덱스이다.
+                                        // TODO : 이와 같은 방식은 비 경제적이다.
+                                        // tile_atlas를 생성할 때, 어떤 texutre index인지, 그리고 해당 texture의 어떤 위치인지를
+                                        // 등록하는 편이 좋다.
+                                        // 즉 말하자면 Vector이면 되지, 굳이 HashMap일 필요가 없다.
+                                        // Vec<(texture_idx: usize, x, y, w, h)> 이면 됨..
+                                        let idx_gid = self.gids.get(&gid).unwrap();
 
-                                let rect =
-                                    self.tile_atlases.get(&idx_gid).unwrap().get_tile_rect(gid);
+                                        let rect = self
+                                            .tile_atlases
+                                            .get(&idx_gid)
+                                            .unwrap()
+                                            .get_tile_rect(gid);
 
-                                renderer.render(
-                                    &self.textures[&idx_gid],
-                                    rect,
-                                    Rect::new(
-                                        (x - tile_left) as i32 * tile_width as i32 - tile_start_x,
-                                        (y - tile_top) as i32 * tile_height as i32 - tile_start_y,
-                                        tile_width,
-                                        tile_height,
-                                    ),
-                                    0.0,
-                                    Point::new(0, 0),
-                                    false,
-                                    false,
-                                );
+                                        texture_canvas
+                                            .copy_ex(
+                                                &self.textures[&idx_gid],
+                                                rect,
+                                                Rect::new(
+                                                    (x - tile_left) as i32 * tile_width as i32
+                                                        - tile_start_x,
+                                                    (y - tile_top) as i32 * tile_height as i32
+                                                        - tile_start_y,
+                                                    tile_width,
+                                                    tile_height,
+                                                ),
+                                                0.0,
+                                                Point::new(0, 0),
+                                                false,
+                                                false,
+                                            )
+                                            .unwrap();
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
-        }
+            })
+            .unwrap();
+
+        renderer.render(
+            camera_buffer,
+            Rect::new(0, 0, camera_rect.width(), camera_rect.height()),
+            Rect::new(0, 0, camera_rect.width(), camera_rect.height()),
+            0.0,
+            Point::new(0, 0),
+            false,
+            false,
+        );
     }
 }

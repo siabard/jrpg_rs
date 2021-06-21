@@ -22,11 +22,11 @@ impl<'a> Sprite<'a> {
         }
     }
 
-    pub fn render(&self, renderer: &mut Renderer) {
+    pub fn render(&self, renderer: &mut Renderer, camera_rect: &Rect) {
         renderer.render(
             self.texture,
             self.rect,
-            Rect::new(self.x, self.y, 32, 32),
+            Rect::new(self.x - camera_rect.x, self.y - camera_rect.y, 32, 32),
             0.0,
             Point::new(0, 0),
             false,

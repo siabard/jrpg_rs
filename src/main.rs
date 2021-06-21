@@ -5,6 +5,8 @@ use jrpg_rs::map::*;
 
 use sdl2::event::Event;
 use sdl2::image::InitFlag;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Point;
 use sdl2::rect::Rect;
 
@@ -25,6 +27,15 @@ fn main() -> Result<(), &'static str> {
         .expect("ERR::MAIN::INIT::CANVAS");
 
     let texture_creator = canvas.texture_creator();
+
+    let mut camera_rect = Rect::new(0, 0, 320, 200);
+    let mut camera_buffer = texture_creator
+        .create_texture_target(
+            PixelFormatEnum::RGBA8888,
+            camera_rect.width(),
+            camera_rect.height(),
+        )
+        .unwrap();
 
     let mut textures = TextureManager::new();
     textures.load_texture(&texture_creator, "player", &Path::new("assets/mychar.png"));
@@ -59,6 +70,23 @@ fn main() -> Result<(), &'static str> {
                 Event::Quit { .. } => {
                     break 'running;
                 }
+                Event::KeyDown {
+                    keycode: Some(k), ..
+                } => match k {
+                    Keycode::Up => {
+                        camera_rect.y -= 1;
+                    }
+                    Keycode::Down => {
+                        camera_rect.y += 1;
+                    }
+                    Keycode::Left => {
+                        camera_rect.x -= 1;
+                    }
+                    Keycode::Right => {
+                        camera_rect.x += 1;
+                    }
+                    _ => {}
+                },
                 _ => {}
             }
         }
@@ -68,18 +96,10 @@ fn main() -> Result<(), &'static str> {
 
         renderer.clear();
 
-        renderer.render(
-            textures.get_texture("player").unwrap(),
-            player.rect,
-            Rect::new(player.x, player.y, 32, 32),
-            0.0,
-            Point::new(0, 0),
-            false,
-            false,
-        );
+        map.render(&mut renderer, &camera_rect, &mut camera_buffer);
+        player.render(&mut renderer, &camera_rect);
 
-        map.render(&mut renderer, &Rect::new(0, 0, 320, 200));
-        player.render(&mut renderer);
+        //renderer.draw_rect(camera_rect);
 
         renderer.present();
         now = timer_subsystem.ticks();
