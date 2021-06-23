@@ -1,7 +1,7 @@
 pub mod renderer;
-pub mod texture;
 pub mod sprite;
+pub mod texture;
 
 pub use renderer::*;
-pub use texture::*;
 pub use sprite::*;
+pub use texture::*;

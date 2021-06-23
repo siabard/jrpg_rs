@@ -1,13 +1,13 @@
 use std::path::Path;
 
 use jrpg_rs::graphics::*;
+use jrpg_rs::input::Input;
 use jrpg_rs::map::*;
 
 use sdl2::event::Event;
 use sdl2::image::InitFlag;
-use sdl2::keyboard::Keycode;
+use sdl2::keyboard::Scancode;
 use sdl2::pixels::PixelFormatEnum;
-use sdl2::rect::Point;
 use sdl2::rect::Rect;
 
 fn main() -> Result<(), &'static str> {
@@ -16,6 +16,7 @@ fn main() -> Result<(), &'static str> {
     let _image_subsystem = sdl2::image::init(InitFlag::all());
     let timer_subsystem = sdl_context.timer().expect("ERR::MAIN::INIT_TIMER");
 
+    let mut input = Input::default();
     let window = video_subsystem
         .window("JPRG", 800, 600)
         .position_centered()
@@ -64,31 +65,35 @@ fn main() -> Result<(), &'static str> {
     'running: loop {
         dt = (now - last_time) as f64 / 1000.0;
         last_time = now;
+        input.begin_new_frame();
 
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } => {
                     break 'running;
                 }
-                Event::KeyDown {
-                    keycode: Some(k), ..
-                } => match k {
-                    Keycode::Up => {
-                        camera_rect.y -= 1;
-                    }
-                    Keycode::Down => {
-                        camera_rect.y += 1;
-                    }
-                    Keycode::Left => {
-                        camera_rect.x -= 1;
-                    }
-                    Keycode::Right => {
-                        camera_rect.x += 1;
-                    }
-                    _ => {}
-                },
+                Event::KeyDown { repeat, .. } if !repeat => {
+                    input.key_down_event(&event);
+                }
+                Event::KeyUp { .. } => input.key_up_event(&event),
                 _ => {}
             }
+        }
+
+        if input.is_key_held(Scancode::Up) {
+            camera_rect.y -= 1;
+        }
+        if input.is_key_held(Scancode::Down) {
+            camera_rect.y += 1;
+        }
+        if input.is_key_held(Scancode::Left) {
+            camera_rect.x -= 1;
+        }
+        if input.is_key_held(Scancode::Right) {
+            camera_rect.x += 1;
+        }
+        if input.was_key_pressed(Scancode::Q) {
+            break 'running;
         }
 
         player.x += (300.0 * dt) as i32;
@@ -99,7 +104,7 @@ fn main() -> Result<(), &'static str> {
         map.render(&mut renderer, &camera_rect, &mut camera_buffer);
         player.render(&mut renderer, &camera_rect);
 
-        //renderer.draw_rect(camera_rect);
+        renderer.draw_rect(Rect::new(0, 0, camera_rect.width(), camera_rect.height()));
 
         renderer.present();
         now = timer_subsystem.ticks();

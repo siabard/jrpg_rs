@@ -122,17 +122,28 @@ impl<'a> Map<'a> {
 
     /// translate position (left, top) to tile
     /// map is positioned on (0, 0)
-    pub fn point_to_tile(&self, tile_index: usize, left: i32, top: i32) -> (i32, i32) {
+    pub fn point_to_tile(&self, tile_index: usize, left: i32, top: i32, ceilp: bool) -> (i32, i32) {
         let o_x = 0.max(left);
         let o_y = 0.max(top);
 
         let tile_width = *self.tile_widths.get(&tile_index).unwrap();
         let tile_height = *self.tile_heights.get(&tile_index).unwrap();
-        let clamp_x = o_x.min(left + (self.width * tile_width) as i32 - 1);
-        let clamp_y = o_y.min(top + (self.height * tile_height) as i32 - 1);
+        let clamp_x =
+            o_x.min(left + (self.width * tile_width) as i32 - (if ceilp { 0 } else { 1 }));
+        let clamp_y =
+            o_y.min(top + (self.height * tile_height) as i32 - (if ceilp { 0 } else { 1 }));
 
-        let tile_x = clamp_x / tile_width as i32;
-        let tile_y = clamp_y / tile_height as i32;
+        let tile_x = if ceilp {
+            (clamp_x as f64 / tile_width as f64).ceil() as i32
+        } else {
+            clamp_x / tile_width as i32
+        };
+
+        let tile_y = if ceilp {
+            (clamp_y as f64 / tile_height as f64).ceil() as i32
+        } else {
+            clamp_y / tile_height as i32
+        };
 
         (tile_x, tile_y)
     }
@@ -163,11 +174,12 @@ impl<'a> Map<'a> {
                     if layer.name != "collision" {
                         if let tiled::LayerData::Finite(tiles) = &layer.tiles {
                             let (tile_left, tile_top) =
-                                self.point_to_tile(i, camera_rect.x, camera_rect.y);
+                                self.point_to_tile(i, camera_rect.x, camera_rect.y, false);
                             let (tile_right, tile_bottom) = self.point_to_tile(
                                 i,
                                 camera_rect.x + camera_rect.w,
                                 camera_rect.y + camera_rect.h,
+                                true,
                             );
 
                             // 카메라의 좌측/위가 타일에 정확히 일치한다면 tile_start_x와 tile_start_y는 0이 되겠지만

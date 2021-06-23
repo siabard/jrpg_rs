@@ -15,11 +15,12 @@ impl<'a> Renderer<'a> {
     }
 
     pub fn clear(&mut self) {
+        self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
         self.canvas.clear();
     }
 
     pub fn draw_rect(&mut self, rect: Rect) {
-        self.canvas.set_draw_color(Color::RGB(255, 255, 255));
+        self.canvas.set_draw_color(Color::RGBA(255, 0, 0, 200));
         self.canvas.draw_rect(rect).unwrap();
     }
 
