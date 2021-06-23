@@ -81,16 +81,16 @@ fn main() -> Result<(), &'static str> {
         }
 
         if input.is_key_held(Scancode::Up) {
-            camera_rect.y -= 1;
+            camera_rect.y -= (300.0 * dt) as i32;
         }
         if input.is_key_held(Scancode::Down) {
-            camera_rect.y += 1;
+            camera_rect.y += (300.0 * dt) as i32;
         }
         if input.is_key_held(Scancode::Left) {
-            camera_rect.x -= 1;
+            camera_rect.x -= (300.0 * dt) as i32;
         }
         if input.is_key_held(Scancode::Right) {
-            camera_rect.x += 1;
+            camera_rect.x += (300.0 * dt) as i32;
         }
         if input.was_key_pressed(Scancode::Q) {
             break 'running;
