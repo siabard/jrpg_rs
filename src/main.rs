@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use jrpg_rs::camera::follow;
 use jrpg_rs::graphics::*;
 use jrpg_rs::input::Input;
 use jrpg_rs::map::*;
@@ -48,7 +49,12 @@ fn main() -> Result<(), &'static str> {
         textures.get_texture("player").as_ref().unwrap(),
         100,
         100,
+        0.5,
     );
+
+    player.add_animation("MOVE".to_string(), Rect::new(0, 0, 16, 16), vec![0, 1, 2]);
+    player.set_key("MOVE".to_string());
+
     let map = Map::new(
         "world_map".to_owned(),
         &texture_creator,
@@ -64,6 +70,7 @@ fn main() -> Result<(), &'static str> {
 
     'running: loop {
         dt = (now - last_time) as f64 / 1000.0;
+
         last_time = now;
         input.begin_new_frame();
 
@@ -81,27 +88,34 @@ fn main() -> Result<(), &'static str> {
         }
 
         if input.is_key_held(Scancode::Up) {
-            camera_rect.y -= (300.0 * dt) as i32;
+            player.y -= (300.0 * dt) as i32;
         }
         if input.is_key_held(Scancode::Down) {
-            camera_rect.y += (300.0 * dt) as i32;
+            player.y += (300.0 * dt) as i32;
         }
         if input.is_key_held(Scancode::Left) {
-            camera_rect.x -= (300.0 * dt) as i32;
+            player.x -= (300.0 * dt) as i32;
         }
         if input.is_key_held(Scancode::Right) {
-            camera_rect.x += (300.0 * dt) as i32;
+            player.x += (300.0 * dt) as i32;
         }
         if input.was_key_pressed(Scancode::Q) {
             break 'running;
         }
 
-        player.x += (300.0 * dt) as i32;
-        player.y += (300.0 * dt) as i32;
+        let player_rect = Rect::new(
+            player.x,
+            player.y,
+            player.rect.width(),
+            player.rect.height(),
+        );
+
+        camera_rect = follow(&camera_rect, &player_rect, 0.2);
 
         renderer.clear();
 
         map.render(&mut renderer, &camera_rect, &mut camera_buffer);
+        player.update(dt);
         player.render(&mut renderer, &camera_rect);
 
         renderer.draw_rect(Rect::new(0, 0, camera_rect.width(), camera_rect.height()));

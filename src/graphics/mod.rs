@@ -1,3 +1,4 @@
+pub mod camera;
 pub mod renderer;
 pub mod sprite;
 pub mod texture;
