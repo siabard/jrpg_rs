@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::time::Duration;
 
 use jrpg_rs::camera::follow;
 use jrpg_rs::graphics::*;
@@ -52,8 +53,11 @@ fn main() -> Result<(), &'static str> {
         0.5,
     );
 
-    player.add_animation("MOVE".to_string(), Rect::new(0, 0, 16, 16), vec![0, 1, 2]);
-    player.set_key("MOVE".to_string());
+    player.add_animation("LEFT".to_string(), Rect::new(0, 0, 16, 16), vec![0, 1, 2]);
+    player.set_key("LEFT".to_string());
+
+    player.add_animation("RIGHT".to_string(), Rect::new(0, 16, 16, 16), vec![0, 1, 2]);
+    player.set_key("RIGHT".to_string());
 
     let map = Map::new(
         "world_map".to_owned(),
@@ -70,8 +74,8 @@ fn main() -> Result<(), &'static str> {
 
     'running: loop {
         dt = (now - last_time) as f64 / 1000.0;
-
         last_time = now;
+
         input.begin_new_frame();
 
         for event in event_pump.poll_iter() {
@@ -95,9 +99,11 @@ fn main() -> Result<(), &'static str> {
         }
         if input.is_key_held(Scancode::Left) {
             player.x -= (300.0 * dt) as i32;
+            player.set_key("LEFT".to_string());
         }
         if input.is_key_held(Scancode::Right) {
             player.x += (300.0 * dt) as i32;
+            player.set_key("RIGHT".to_string());
         }
         if input.was_key_pressed(Scancode::Q) {
             break 'running;
@@ -121,6 +127,8 @@ fn main() -> Result<(), &'static str> {
         renderer.draw_rect(Rect::new(0, 0, camera_rect.width(), camera_rect.height()));
 
         renderer.present();
+
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 120));
         now = timer_subsystem.ticks();
     }
 

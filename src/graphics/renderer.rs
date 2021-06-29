@@ -1,5 +1,4 @@
 use sdl2::{
-    gfx::primitives::DrawRenderer,
     pixels::Color,
     rect::{Point, Rect},
     render::{Texture, WindowCanvas},
