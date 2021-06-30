@@ -1,4 +1,3 @@
-use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Point;
 use sdl2::rect::Rect;
 

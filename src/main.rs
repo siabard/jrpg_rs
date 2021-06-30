@@ -6,6 +6,7 @@ use jrpg_rs::graphics::*;
 use jrpg_rs::input::Input;
 use jrpg_rs::map::*;
 
+use jrpg_rs::player::Player;
 use sdl2::event::Event;
 use sdl2::image::InitFlag;
 use sdl2::keyboard::Scancode;
@@ -45,19 +46,7 @@ fn main() -> Result<(), &'static str> {
 
     let mut renderer = Renderer::new(&mut canvas);
 
-    let mut player = Sprite::new(
-        Rect::new(0, 0, 32, 32),
-        textures.get_texture("player").as_ref().unwrap(),
-        100,
-        100,
-        0.5,
-    );
-
-    player.add_animation("LEFT".to_string(), Rect::new(0, 0, 16, 16), vec![0, 1, 2]);
-    player.set_key("LEFT".to_string());
-
-    player.add_animation("RIGHT".to_string(), Rect::new(0, 16, 16, 16), vec![0, 1, 2]);
-    player.set_key("RIGHT".to_string());
+    let mut player = Player::new(textures.get_texture("player").as_ref().unwrap());
 
     let map = Map::new(
         "world_map".to_owned(),
@@ -92,29 +81,22 @@ fn main() -> Result<(), &'static str> {
         }
 
         if input.is_key_held(Scancode::Up) {
-            player.y -= (300.0 * dt) as i32;
+            player.move_y((-300.0 * dt) as i32);
         }
         if input.is_key_held(Scancode::Down) {
-            player.y += (300.0 * dt) as i32;
+            player.move_y((300.0 * dt) as i32);
         }
         if input.is_key_held(Scancode::Left) {
-            player.x -= (300.0 * dt) as i32;
-            player.set_key("LEFT".to_string());
+            player.move_x((-300.0 * dt) as i32);
         }
         if input.is_key_held(Scancode::Right) {
-            player.x += (300.0 * dt) as i32;
-            player.set_key("RIGHT".to_string());
+            player.move_x((300.0 * dt) as i32);
         }
         if input.was_key_pressed(Scancode::Q) {
             break 'running;
         }
 
-        let player_rect = Rect::new(
-            player.x,
-            player.y,
-            player.rect.width(),
-            player.rect.height(),
-        );
+        let player_rect = player.get_rect();
 
         camera_rect = follow(&camera_rect, &player_rect, 0.2);
 
