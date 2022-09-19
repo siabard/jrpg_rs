@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="0" backgroundcolor="#ff00ff" nextlayerid="7" nextobjectid="5">
+ <tileset firstgid="1" name="tilesheet" tilewidth="32" tileheight="32" tilecount="84" columns="14">
+  <properties>
+   <property name="tileset property" value="tsp"/>
+  </properties>
+  <image source="tilesheet.png" width="448" height="192"/>
+  <tile id="1">
+   <properties>
+    <property name="a tile property" value="123"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="85" source="collide.tsx"/>
+ <layer id="6" name="ground" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt1MEJgDAURMGcogWoBaj91+hvIRJhwRlY2Apeb60ttbXWBz/zbbW9drz4zHfWrtr94jPfaKP06lt6lUWvsuhVFr3KoldZ9CqLXmXRKwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIB/ewB3pw7F
+  </data>
+ </layer>
+ <layer id="5" name="Objects" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt1bEJACAMRUEXcv/1bCxEhFTKB+8g2KTyIbZGoj6HbBpBzTt5qy/nPvsOd1V/+akN97jnLHrk0SSTLpl0AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPjDAMwMA7I=
+  </data>
+ </layer>
+ <layer id="4" name="collision" width="100" height="100" opacity="0.3">
+  <data encoding="base64" compression="zlib">
+   eJzt1bEJACAMRUGXdP9VbCxEhFTKB+8g2KTyIbZGoj6HbBpBzTt5qy/nPvsOd1V/+akN97jnLHrk0SSTLpl0AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPjDAITIBvo=
+  </data>
+ </layer>
+</map>
