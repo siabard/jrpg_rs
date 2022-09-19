@@ -42,11 +42,15 @@ fn main() -> Result<(), &'static str> {
         .unwrap();
 
     let mut textures = TextureManager::new();
-    textures.load_texture(&texture_creator, "player", &Path::new("assets/mychar.png"));
+    textures.load_texture(
+        &texture_creator,
+        &"player".to_owned(),
+        Path::new("assets/mychar.png"),
+    );
 
     let mut renderer = Renderer::new(&mut canvas);
 
-    let mut player = Player::new(textures.get_texture("player").as_ref().unwrap());
+    let mut player = Player::new(textures.get_texture(&"player".to_owned()).as_ref().unwrap());
 
     let map = Map::new(
         "world_map".to_owned(),

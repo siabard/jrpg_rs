@@ -6,12 +6,12 @@ use sdl2::{
     video::WindowContext,
 };
 
-pub struct TextureManager<'a, 'b> {
-    texture_map: HashMap<&'a str, Texture<'b>>,
+pub struct TextureManager<'a> {
+    texture_map: HashMap<String, Texture<'a>>,
 }
 
-impl<'a, 'b> TextureManager<'a, 'b> {
-    pub fn new() -> TextureManager<'a, 'b> {
+impl<'a> TextureManager<'a> {
+    pub fn new() -> TextureManager<'a> {
         TextureManager {
             texture_map: HashMap::new(),
         }
@@ -19,14 +19,13 @@ impl<'a, 'b> TextureManager<'a, 'b> {
 
     pub fn load_texture(
         &mut self,
-        texture_creator: &'b TextureCreator<WindowContext>,
-        name: &'a str,
+        texture_creator: &'a TextureCreator<WindowContext>,
+        name: &dyn ToString,
         path: &Path,
     ) {
         match texture_creator.load_texture(path) {
             Ok(it) => {
-                println!("{}", name);
-                self.texture_map.insert(name, it);
+                self.texture_map.insert(name.to_string(), it);
             }
             _ => {
                 println!("Cannot found file {:?}", path);
@@ -34,7 +33,7 @@ impl<'a, 'b> TextureManager<'a, 'b> {
         };
     }
 
-    pub fn get_texture(&self, name: &'a str) -> Option<&Texture<'b>> {
-        self.texture_map.get(name)
+    pub fn get_texture(&self, name: &dyn ToString) -> Option<&Texture<'a>> {
+        self.texture_map.get(&name.to_string())
     }
 }
